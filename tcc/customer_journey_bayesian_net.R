@@ -3,6 +3,7 @@ library(bnlearn)
 library(Rgraphviz)
 
 setwd("C:/dev/bayesian-nets/tcc")
+# este csv está o google drive, na pasta TCC/Dados. O SQL tb está lá
 journey <- read.csv("customer_journey.csv", header = TRUE)
 head(journey)
 colnames(journey)
