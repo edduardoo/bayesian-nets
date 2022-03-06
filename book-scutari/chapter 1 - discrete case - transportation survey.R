@@ -1,6 +1,6 @@
 library(bnlearn)
 
-# creating the DAG with one node for each variable in the survey. No archs at this point
+# creating the DAG with one node for each variable in the survey. No arcs at this point
 dag <- empty.graph(nodes = c("A", "S", "E", "O", "R", "T"))
 # "empty graph" = it has an empty arc set
 dag
@@ -23,14 +23,14 @@ dag
 # a product of conditional probabilities:
 modelstring(dag)
 
-# MANIPULATING ARCHS
+# MANIPULATING ARCS
 # with bnlearn we can manipulate the arcs
 # checking the nodes
 nodes(dag)
 arcs(dag)
 
 # this last function can also be used to set the arcs or to create the
-# networkd in an easier way, like this:
+# network in an easier way, like this:
 dag2 <- empty.graph(nodes = c("A", "S", "E", "O", "R", "T"))
 arc.set <- matrix(c("A", "E",
                       "S", "E",
@@ -73,7 +73,7 @@ S.prob <- array(c(0.60, 0.40), dim = 2,
 S.prob
 
 
-# Ocupation and Residence, which depend on Education, are modelled by 
+# Ocupation and Residence, which depend on Education, are modeled by 
 # two-dimensional conditional probability tables.
 O.prob <- array(c(0.96, 0.04, 0.92, 0.08), dim = c(2, 2),
                 dimnames = list(O = O.lv, E = E.lv))
@@ -84,9 +84,9 @@ R.prob <- array(c(0.25, 0.75, 0.20, 0.80), dim = c(2, 2),
 R.prob
 
 
-# Education and Travel are modelled as three-dimensional tables, 
+# Education and Travel are modeled as three-dimensional tables, 
 # since they have two parents each
-# TODO: enteder melhor como essa table de 3 dim é criada com dimensoes que nao tem o mesmo tamanho
+# TODO: entender melhor como essa table de 3 dim é criada com dimensoes que nao tem o mesmo tamanho
 E.prob <- array(c(0.75, 0.25, 0.72, 0.28, 0.88, 0.12, 0.64,
                    0.36, 0.70, 0.30, 0.90, 0.10), dim = c(2, 3, 2),
                  dimnames = list(E = E.lv, A = A.lv, S = S.lv))
@@ -129,7 +129,7 @@ nodes(bn)
 # the conditional probability tables can be printed from the bn.fit object
 bn$R
 
-# extracting the probability table to use later (coef is from "stats")
+# we can extract the probability table to use later if we need (coef is from "stats")
 R.cpt <- coef(bn$R)
 
 # just typing the bn.fit object causes all the prob tables to be printed
@@ -138,8 +138,8 @@ bn
 
 # ESTIMATING THE LOCAL DISTRIBUTIONS FROM DATA
 # while custom.fit() constructs the BN using a set of custom parameters specified by the user, 
-# bn.fit() estimates the parameters from data. Both return a bn.fit object
-# "method" attribute determines which estimator to use. mle="maximum likelihood estimator"
+# bn.fit() estimates the parameters from data. Both return a bn.fit object.
+# The "method" attribute determines which estimator to use. mle="maximum likelihood estimator"
 setwd("C:/dev/bayesian-nets/book-scutari")
 
 # reading the data
@@ -189,17 +189,18 @@ ci.test("T", "E", c("O", "R"), test = "mi", data = survey)
 ci.test("T", "E", c("O", "R"), test = "x2", data = survey)
 # both tests above return large p-values, indicating that the dependence relationship
 # encoded by E x T is not significant given the current DAG structure
+?ci.test
 
-# we can also test if an arch can be removed
+# we can also test if an arc can be removed
 ci.test("T", "O", "R", test = "x2", data = survey)
 
-# we can test all archs with arc.strength
+# we can test all arcs with arc.strength
 arc.strength(dag, data = survey, criterion = "x2")
 # if criterion is a conditional independence test, the strength is a p-value 
 # (so the lower the value, the stronger the relationship)
 # arc.strenght removes each arc from the graph and quantifies the change with some probabilistic criterion
 # it can quantify with either a conditional independence test or with a network score
-# if it's an independence teste, the test is for the "to" node to be independent from 
+# if it's an independence test, the test is for the "to" node to be independent from 
 # the "from" node conditional on the remaining parents of "to"
 # in the above example, all arcs with the exception of O -> T have p-values smaller than 0.05 and are well supported by the data.
 ?arc.strength
@@ -234,7 +235,7 @@ modelstring(learned)
 
 # any arc removal will decrease the BIC score
 # arc.strength returns the change in the score caused by each arc removal,
-# since we provided a networkd score as the criterion
+# since we provided a network score as the criterion
 arc.strength(learned, data = survey, criterion = "bic")
 
 
@@ -247,9 +248,9 @@ arc.strength(dag, data = survey, criterion = "bic")
 ##############################
 # checking if S and R are d-separated
 dsep(dag, x = "S", y = "R")
-
 # S is associated with R because E is influenced by S and R is influenced by E
-# path function shows there is a path from S to R
+
+# path.exists function shows there is a path from S to R
 path.exists(dag, from = "S", to = "R")
 
 # if we condition on E, that path is blocked and S and R become independent
@@ -270,7 +271,7 @@ querygrain(junction, nodes = "T")$T
 # we want to see the impact of being a woman on travel preferences
 # setting the evidence of being a woman
 jsex <- setEvidence(junction, nodes = "S", states = "F")
-# querying the distributino of node T again, but now with the new evidence
+# querying the distribution of node T again, but now with the new evidence
 querygrain(jsex, nodes = "T")$T
 
 # querying to see how living in small city affects car and train use
@@ -288,7 +289,7 @@ querygrain(jedu, nodes = c("S", "T"), type = "marginal")
 querygrain(jedu, nodes = c("S", "T"), type = "conditional")
 # probabilites are identical. It suggests that S is independent from T conditional on E
 # that is: considering people with high education, the travel doesn't depend on the sex
-# this is also implied by graphical separation
+# this is also implied by graphical separation:
 dsep(bn, x = "S", y = "T", z = "E")
 
 
@@ -304,7 +305,7 @@ cpquery(bn, event = (S == "M") & (T == "car"), evidence = (E == "high"), n = 10^
 cpquery(bn, event = (S == "M") & (T == "car"), evidence = list(E = "high"), method = "lw")
 
 
-# a more complex query:the probability of a man travelling by car given that 
+# a more complex query: the probability of a man traveling by car given that 
 # his Age is young and his Education is uni or that he is an adult, regardless of his Education.
 cpquery(bn, event = (S == "M") & (T == "car"), evidence = ((A == "young") & (E == "uni")) | (A == "adult"))
 
